@@ -5,10 +5,14 @@ defmodule CapsuleEcto.MixProject do
     [
       app: :capsule_ecto,
       version: "0.1.0",
+      description: "Ecto integration for Capsule",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env()),
+      name: "CapsuleEcto",
+      source_url: "https://github.com/elixir-capsule/capsule_ecto",
+      package: package()
     ]
   end
 
@@ -23,10 +27,19 @@ defmodule CapsuleEcto.MixProject do
   defp deps do
     [
       {:capsule, "~> 0.2"},
-      {:ecto, "~> 3.4"}
+      {:ecto, "~> 3.4"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp package do
+    [
+      maintainers: ["Thomas Floyd Wright"],
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => "https://github.com/elixir-capsule/capsule_ecto"}
+    ]
+  end
 end
