@@ -9,16 +9,25 @@ defmodule Capsule.EctoTest do
     test "adds the encapsulation data to changeset" do
       assert %{changes: %{attachment: data}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _field, _param ->
+               |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, changeset ->
                  %Encapsulation{}
                end)
+    end
+
+    test "adds adds error to attachment field" do
+      %{errors: errors} =
+        Ecto.Changeset.change(%TestUser{})
+        |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, changeset ->
+          Ecto.Changeset.add_error(changeset, :attachment, "wrong")
+        end)
+
+      assert {"wrong", []} = errors[:attachment]
     end
 
     test "adds the encapsulation data to changeset when params have binary keys" do
       assert %{changes: %{attachment: data}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{"attachment" => %{}}, [:attachment], fn _field,
-                                                                                     _param ->
+               |> Capsule.Ecto.encapsulate(%{"attachment" => %{}}, [:attachment], fn _, _ ->
                  %Encapsulation{}
                end)
     end

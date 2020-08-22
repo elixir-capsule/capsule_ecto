@@ -18,22 +18,21 @@ defmodule Capsule.Ecto do
       )
 
   defp do_encapsulate(changeset, params, permitted, encapsulation_args) do
-    params_with_config =
-      params
-      |> Enum.map(fn {k, _} = params ->
-        if permitted_param?(k, permitted) do
-          {k, generate_encapsulation(encapsulation_args |> Tuple.append([params, changeset]))}
-        else
-          params
-        end
-      end)
-      |> Enum.into(%{})
-
-    Ecto.Changeset.cast(changeset, params_with_config, permitted)
+    Enum.reduce(params, changeset, fn {field, _} = params_pair, changeset ->
+      with true <- permitted_param?(field, permitted),
+           %Capsule.Encapsulation{} = encapsulation <-
+             do_encapsulate(encapsulation_args |> Tuple.append([params_pair, changeset])) do
+        Ecto.Changeset.cast(changeset, %{field => encapsulation}, permitted)
+      end
+      |> case do
+        false -> changeset
+        %Ecto.Changeset{} = changeset -> changeset
+      end
+    end)
   end
 
-  defp generate_encapsulation({mod, func, args}), do: apply(mod, func, args)
-  defp generate_encapsulation({func, args}), do: apply(func, args)
+  defp do_encapsulate({mod, func, args}), do: apply(mod, func, args)
+  defp do_encapsulate({func, args}), do: apply(func, args)
 
   defp permitted_param?(k, permitted) when is_atom(k),
     do: [k, k |> Atom.to_string()] |> Enum.any?(&(&1 in permitted))
