@@ -22,7 +22,7 @@ This package adds the following two features to support the use of Capsule with 
         case Capsule.Storages.Disk.put(upload) do
           {:ok, cap} ->
             Capsule.add_metadata(cap, %{yo: :dawg})
-            |> validate_something
+            |> return_upload_or_changeset_with_error
           error_tuple ->
             changeset |> add_error("upload just...failed")
         end
