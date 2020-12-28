@@ -43,7 +43,7 @@ Even if you want to extract some metadata and apply a validation after you store
 
   ```
 
-  However, if you want to do more complicated things with the upload before storing it (such as resizing, encrypting, etc) then creating a module is probably the way to go.
+However, if you want to do more complicated things with the upload before storing it (such as resizing, encrypting, etc) then creating a module is probably the way to go.
 
   ```
   |> %Attachment{}
@@ -51,16 +51,17 @@ Even if you want to extract some metadata and apply a validation after you store
   |> Capsule.Ecto.encapsulate(%{"file_data" => some_upload}, [:file_data], MyApp.Attacher, :attach)
   ```
 
-  ### Upload cleanup
+## Upload cleanup
 
-  Since the file is written to disk as part of the changeset, you will probably want to do some cleanup depending on the error status. On success you may want to move the file from a temporary location to permanent storage (especially if the latter is in the cloud and costs a network request). On failure you may want to delete the file (unless you are handling that with some sort of periodic task).
+Since the file is written to disk as part of the changeset, you will probably want to do some cleanup depending on the error status. On success you may want to move the file from a temporary location to permanent storage (especially if the latter is in the cloud and costs a network request). On failure you may want to delete the file (unless you are handling that with some sort of periodic task).
 
-  One good option is to wrap your Repo operation in another function to handle both as asynchronous Tasks so they don't block the parent process:
+One good option is to wrap your Repo operation in another function to handle both as asynchronous Tasks so they don't block the parent process:
 
   ```
   def create_attachment(user, attrs) do
-  %Attachment{user: user}
-  |> Attachment.changeset(attrs)
+  %Attachment{}
+  |> Ecto.changeset.change()
+  |> Capsule.Ecto.encapsulate(attrs, [:file_data], MyApp.Attacher, :attach)
   |> Repo.insert()
   |> case do
     {:ok, source} = success_tuple ->
@@ -81,19 +82,19 @@ Even if you want to extract some metadata and apply a validation after you store
   end
   ```
 
-  `Attachment.promote_upload(attachment)` should handle moving the file and updating the file data in the db:
+In this example, `Attachment.promote_upload(attachment)` would handle moving the file and updating the file data in the db. It uses `Multi` to ensure all operations succeed or fail together:
 
   ```
   def promote_upload(attachment) do
     Multi.new()
-    |> Multi.run(:move_file, fn _, _ ->
-      NetWorkStorage.put(attachment.file_data)
+    |> Multi.run(:copy_file, fn _, _ ->
+      NetworkStorage.put(attachment.file_data)
     end)
-    |> Multi.run(:delete_file, fn _, _ ->
-      Disk.delete(attachment.file_data)
-    end)
-    |> Multi.update(:updated_source, fn %{move_file: new_data} ->
+    |> Multi.update(:updated_schema, fn %{move_file: new_data} ->
       Attachment.changeset(attachment, %{file_data: new_data })
+    end)
+    |> Multi.run(:delete_old_file, fn _, _ ->
+      Disk.delete(attachment.file_data)
     end)
     |> Repo.transaction()
   end
