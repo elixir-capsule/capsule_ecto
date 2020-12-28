@@ -50,6 +50,7 @@ However, if you want to do more complicated things with the upload before storin
   |> Ecto.changeset.change()
   |> Capsule.Ecto.encapsulate(%{"file_data" => some_upload}, [:file_data], MyApp.Attacher, :attach)
   ```
+---
 
 ## Upload cleanup
 
@@ -97,5 +98,46 @@ In this example, `Attachment.promote_upload(attachment)` would handle moving the
       Disk.delete(attachment.file_data)
     end)
     |> Repo.transaction()
+  end
+  ```
+
+## Testing
+
+Since Encapsulations are serialized as plain maps, it is easy to stub out file operations in fixtures/factories by inserting data directly into the db without going through a changeset:
+
+  ```
+  %Attachment{
+    file_data: %{
+      id: "fake.jpg",
+      metadata: %{name: "fake"}, size: 100
+    }
+  }
+  |> Repo.insert!()
+  ```
+
+If you want to run tests on the actual file operations, you will need to make sure the id points to an actual file location that the configured storage understands.
+
+Or, if you are using [CapsuleSupplement](https://github.com/elixir-capsule/supplement), you can configure your test environment to use the RAM storage:
+
+  ```
+  {:ok, file_data} = Capsule.Storages.RAM.put(some_upload)
+
+  %Attachment{
+    file_data: file_data
+  }
+  |> Repo.insert!()
+  ```
+
+For maximum performance, I recommend creating a simple struct that implements the Upload protocol:
+
+  ```
+  defmodule Capsule.MockUpload do
+    defstruct content: "Hi, I'm a file", name: "hi"
+
+    defimpl Capsule.Upload do
+      def contents(mock), do: {:ok, mock.content}
+
+      def name(mock), do: mock.name
+    end
   end
   ```
