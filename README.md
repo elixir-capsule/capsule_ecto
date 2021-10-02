@@ -2,6 +2,8 @@
 
 Ecto integration for [Capsule](https://github.com/elixir-capsule/capsule)
 
+[![hex package](https://img.shields.io/hexpm/v/capsule_ecto.svg)](https://hex.pm/packages/capsule)
+
 This package adds the following two features to support the use of Capsule with Ecto:
 
 1. Custom Type
