@@ -42,6 +42,7 @@ Even if you want to extract some metadata and apply a validation after you store
         error_tuple ->
           changeset |> add_error("upload just...failed")
       end
+  end)
   |> validate_attachment
 
   ```
