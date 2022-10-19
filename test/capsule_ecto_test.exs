@@ -9,7 +9,7 @@ defmodule Capsule.EctoTest do
     test "adds the locator data to changeset" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, _ ->
+               |> Capsule.Ecto.upload(%{attachment: %{}}, [:attachment], fn _, _ ->
                  %Locator{}
                end)
     end
@@ -17,7 +17,7 @@ defmodule Capsule.EctoTest do
     test "adds adds error to attachment field" do
       %{errors: errors} =
         Ecto.Changeset.change(%TestUser{})
-        |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, changeset ->
+        |> Capsule.Ecto.upload(%{attachment: %{}}, [:attachment], fn _, changeset ->
           Ecto.Changeset.add_error(changeset, :attachment, "wrong")
         end)
 
@@ -27,27 +27,27 @@ defmodule Capsule.EctoTest do
     test "adds the locator data to changeset when params have binary keys" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{"attachment" => %{}}, [:attachment], fn _, _ ->
+               |> Capsule.Ecto.upload(%{"attachment" => %{}}, [:attachment], fn _, _ ->
                  %Locator{}
                end)
     end
   end
 
-  describe "encapsulate/4 with invalid param is ignored" do
+  describe "uploader/4 with invalid param is ignored" do
     test "adds the locator data to changeset" do
       assert %{changes: %{}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{"what" => %{}}, [:attachment], fn _, _ ->
+               |> Capsule.Ecto.upload(%{"what" => %{}}, [:attachment], fn _, _ ->
                  %Locator{}
                end)
     end
   end
 
-  describe "encapsulate/5" do
+  describe "upload/5" do
     test "adds the locator data to changeset" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(
+               |> Capsule.Ecto.upload(
                  %{attachment: %{}},
                  [:attachment],
                  TestAttacher,

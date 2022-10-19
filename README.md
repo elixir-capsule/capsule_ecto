@@ -12,7 +12,7 @@ This package adds the following two features to support the use of Capsule with 
 
 ## Capsule.Ecto.Type
 
-In your Ecto schema specify your file field with the following type to get serialization of encapsulated uploads (`Capsule.Locator`) to maps:
+In your Ecto schema specify your file field with the following type to get serialization of uploads (`Capsule.Locator`) to maps:
 
 ```
 defmodule Attachment
@@ -24,9 +24,9 @@ defmodule Attachment
 end
 ```
 
-## Capsule.Ecto.encapsulate
+## Capsule.Ecto.upload
 
-Cast params to encapsulated data with `Capsule.Ecto.encapsulate`. In the style of Ecto.Multi, it accepts either an anonymous function or a module and function name, both with arity(2). The first argument passed will be a 2 element tuple representing the key/param pair and the second value will be the changeset.
+Cast params to uploaded data with `Capsule.Ecto.upload`. In the style of Ecto.Multi, it accepts either an anonymous function or a module and function name, both with arity(2). The first argument passed will be a 2 element tuple representing the key/param pair and the second value will be the changeset.
 
 It is expected to return either a success tuple with the `Locator` struct or the changeset. In the latter case the changeset will simply be passed on down the pipe.
 
@@ -35,7 +35,7 @@ Even if you want to extract some metadata and apply a validation after you store
   ```
   |> %Attachment{}
   |> Ecto.changeset.change()
-  |> Capsule.Ecto.encapsulate(%{"file_data" => some_upload}, [:file_data], fn {_field, upload}, changeset ->
+  |> Capsule.Ecto.upload(%{"file_data" => some_upload}, [:file_data], fn {_field, upload}, changeset ->
       case Capsule.Storages.Disk.put(upload) do
         {:ok, id} -> %{id: id, storage: Capsule.Storages.Disk, metadata: %{yo: :dawg}}
         error_tuple -> add_error(changeset, "upload just...failed")
@@ -50,7 +50,7 @@ However, if you want to do more complicated things with the upload before storin
   ```
   |> %Attachment{}
   |> Ecto.changeset.change()
-  |> Capsule.Ecto.encapsulate(%{"file_data" => some_upload}, [:file_data], MyApp.Attacher, :attach)
+  |> Capsule.Ecto.upload(%{"file_data" => some_upload}, [:file_data], MyApp.Attacher, :attach)
   ```
 ---
 
@@ -64,7 +64,7 @@ One good option is to wrap your Repo operation in another function to handle bot
   def create_attachment(user, attrs) do
   %Attachment{}
   |> Ecto.changeset.change()
-  |> Capsule.Ecto.encapsulate(attrs, [:file_data], MyApp.Attacher, :attach)
+  |> Capsule.Ecto.upload(attrs, [:file_data], MyApp.Attacher, :attach)
   |> Repo.insert()
   |> case do
     {:ok, attachment} = success_tuple ->
