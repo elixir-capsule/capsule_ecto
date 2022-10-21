@@ -19,6 +19,7 @@ defmodule Capsule.Ecto do
 
   defp do_encapsulate(changeset, params, permitted, encapsulation_args) do
     stringified_permitted = Enum.map(permitted, &to_string/1)
+
     Enum.reduce(params, changeset, fn {field, _} = params_pair, changeset ->
       with true <- Enum.member?(stringified_permitted, to_string(field)),
            %Capsule.Encapsulation{} = encapsulation <-

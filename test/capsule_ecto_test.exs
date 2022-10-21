@@ -7,9 +7,9 @@ defmodule Capsule.EctoTest do
 
   describe "encapsulate/4" do
     test "adds the encapsulation data to changeset" do
-      assert %{changes: %{attachment: data}} =
+      assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, changeset ->
+               |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, _ ->
                  %Encapsulation{}
                end)
     end
@@ -25,7 +25,7 @@ defmodule Capsule.EctoTest do
     end
 
     test "adds the encapsulation data to changeset when params have binary keys" do
-      assert %{changes: %{attachment: data}} =
+      assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(%{"attachment" => %{}}, [:attachment], fn _, _ ->
                  %Encapsulation{}
@@ -37,7 +37,7 @@ defmodule Capsule.EctoTest do
     test "adds the encapsulation data to changeset" do
       assert %{changes: %{}} =
                Ecto.Changeset.change(%TestUser{})
-               |> Capsule.Ecto.encapsulate(%{"what" => %{}}, [:attachment], fn _, changeset ->
+               |> Capsule.Ecto.encapsulate(%{"what" => %{}}, [:attachment], fn _, _ ->
                  %Encapsulation{}
                end)
     end
@@ -45,7 +45,7 @@ defmodule Capsule.EctoTest do
 
   describe "encapsulate/5" do
     test "adds the encapsulation data to changeset" do
-      assert %{changes: %{attachment: data}} =
+      assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(
                  %{attachment: %{}},
