@@ -2,7 +2,7 @@
 
 Ecto integration for [Capsule](https://github.com/elixir-capsule/capsule)
 
-[![hex package](https://img.shields.io/hexpm/v/capsule_ecto.svg)](https://hex.pm/packages/capsule)
+[![hex package](https://img.shields.io/hexpm/v/capsule_ecto.svg)](https://hex.pm/packages/capsule_ecto)
 [![CI status](https://github.com/elixir-capsule/capsule_ecto/workflows/CI/badge.svg)](https://github.com/elixir-capsule/capsulei_ecto/actions)
 
 This package adds the following two features to support the use of Capsule with Ecto:
