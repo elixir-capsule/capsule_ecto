@@ -33,6 +33,16 @@ defmodule Capsule.EctoTest do
     end
   end
 
+  describe "encapsulate/4 with invalid param is ignored" do
+    test "adds the encapsulation data to changeset" do
+      assert %{changes: %{}} =
+               Ecto.Changeset.change(%TestUser{})
+               |> Capsule.Ecto.encapsulate(%{"what" => %{}}, [:attachment], fn _, changeset ->
+                 %Encapsulation{}
+               end)
+    end
+  end
+
   describe "encapsulate/5" do
     test "adds the encapsulation data to changeset" do
       assert %{changes: %{attachment: data}} =
