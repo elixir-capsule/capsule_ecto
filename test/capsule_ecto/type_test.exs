@@ -7,13 +7,13 @@ defmodule Capsule.Ecto.TypeTest do
 
   describe "type/1 with locator" do
     test "wraps locator in success tuple" do
-      assert {:ok, %Locator{id: "test"}} = Type.cast(%Locator{id: "test"})
+      assert {:ok, %Locator{id: "test"}} = Type.cast(%Locator{id: "test", storage: "fake"})
     end
   end
 
   describe "type/1 with map" do
     test "converts map to locator and wraps in success tuple" do
-      assert {:ok, %Locator{id: "test"}} = Type.cast(%{id: "test"})
+      assert {:ok, %Locator{id: "test"}} = Type.cast(%{id: "test", storage: "fake"})
     end
   end
 
