@@ -3,17 +3,17 @@ defmodule Capsule.Ecto.TypeTest do
   doctest Capsule.Ecto
 
   alias Capsule.Ecto.Type
-  alias Capsule.Encapsulation
+  alias Capsule.Locator
 
-  describe "type/1 with encapsulation" do
-    test "wraps encapsulation in success tuple" do
-      assert {:ok, %Encapsulation{id: "test"}} = Type.cast(%Encapsulation{id: "test"})
+  describe "type/1 with locator" do
+    test "wraps locator in success tuple" do
+      assert {:ok, %Locator{id: "test"}} = Type.cast(%Locator{id: "test"})
     end
   end
 
   describe "type/1 with map" do
-    test "converts map to encapsulation and wraps in success tuple" do
-      assert {:ok, %Encapsulation{id: "test"}} = Type.cast(%{id: "test"})
+    test "converts map to locator and wraps in success tuple" do
+      assert {:ok, %Locator{id: "test"}} = Type.cast(%{id: "test"})
     end
   end
 
@@ -24,14 +24,14 @@ defmodule Capsule.Ecto.TypeTest do
   end
 
   describe "load/1 when data is map with string keys" do
-    test "converts map to encapsulation and wraps in success tuple" do
-      assert {:ok, %Encapsulation{id: "test"}} = Type.load(%{"id" => "test"})
+    test "converts map to locator and wraps in success tuple" do
+      assert {:ok, %Locator{id: "test"}} = Type.load(%{"id" => "test"})
     end
   end
 
-  describe "dump/1 when data is an encapsulation" do
-    test "converts encapsulation to map and wraps in success tuple" do
-      assert {:ok, %{id: "test"}} = Type.dump(%Encapsulation{id: "test"})
+  describe "dump/1 when data is an locator" do
+    test "converts locator to map and wraps in success tuple" do
+      assert {:ok, %{id: "test"}} = Type.dump(%Locator{id: "test"})
     end
   end
 

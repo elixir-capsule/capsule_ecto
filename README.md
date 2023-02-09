@@ -12,7 +12,7 @@ This package adds the following two features to support the use of Capsule with 
 
 ## Capsule.Ecto.Type
 
-In your Ecto schema specify your file field with the following type to get serialization of encapsulated uploads (`Capsule.Encapsulation`) to maps:
+In your Ecto schema specify your file field with the following type to get serialization of encapsulated uploads (`Capsule.Locator`) to maps:
 
 ```
 defmodule Attachment
@@ -28,7 +28,7 @@ end
 
 Cast params to encapsulated data with `Capsule.Ecto.encapsulate`. In the style of Ecto.Multi, it accepts either an anonymous function or a module and function name, both with arity(2). The first argument passed will be a 2 element tuple representing the key/param pair and the second value will be the changeset.
 
-It is expected to return either a success tuple with the `Encapsulation` struct or the changeset. In the latter case the changeset will simply be passed on down the pipe.
+It is expected to return either a success tuple with the `Locator` struct or the changeset. In the latter case the changeset will simply be passed on down the pipe.
 
 Even if you want to extract some metadata and apply a validation after you store the file, then the anonymous function may be all you need:
 
@@ -37,10 +37,8 @@ Even if you want to extract some metadata and apply a validation after you store
   |> Ecto.changeset.change()
   |> Capsule.Ecto.encapsulate(%{"file_data" => some_upload}, [:file_data], fn {_field, upload}, changeset ->
       case Capsule.Storages.Disk.put(upload) do
-        {:ok, cap} ->
-          Capsule.add_metadata(cap, %{yo: :dawg})
-        error_tuple ->
-          changeset |> add_error("upload just...failed")
+        {:ok, id} -> %{id: id, storage: Capsule.Storages.Disk, metadata: %{yo: :dawg}}
+        error_tuple -> add_error(changeset, "upload just...failed")
       end
   end)
   |> validate_attachment
@@ -69,7 +67,7 @@ One good option is to wrap your Repo operation in another function to handle bot
   |> Capsule.Ecto.encapsulate(attrs, [:file_data], MyApp.Attacher, :attach)
   |> Repo.insert()
   |> case do
-    {:ok, source} = success_tuple ->
+    {:ok, attachment} = success_tuple ->
       Task.Supervisor.start_child(
         YourApp.Supervisor,
         fn -> Attachment.promote_upload(attachment) end
@@ -80,7 +78,7 @@ One good option is to wrap your Repo operation in another function to handle bot
     {:error, %{changes: %{file_data: file_data}}} = error_tuple ->
       Task.Supervisor.start_child(
         YourApp.Supervisor,
-        fn -> Disk.delete(file_data) end
+        fn -> Disk.delete(file_data.id) end
       )
 
       error_tuple
@@ -93,13 +91,13 @@ In this example, `Attachment.promote_upload(attachment)` would handle moving the
   def promote_upload(attachment) do
     Multi.new()
     |> Multi.run(:copy_file, fn _, _ ->
-      NetworkStorage.put(attachment.file_data)
+      NetworkStorage.put(attachment.file_data.id)
     end)
     |> Multi.update(:updated_schema, fn %{move_file: new_data} ->
       Attachment.changeset(attachment, %{file_data: new_data })
     end)
     |> Multi.run(:delete_old_file, fn _, _ ->
-      Disk.delete(attachment.file_data)
+      Disk.delete(attachment.file_data.id)
     end)
     |> Repo.transaction()
   end
@@ -107,7 +105,7 @@ In this example, `Attachment.promote_upload(attachment)` would handle moving the
 
 ## Testing
 
-Since Encapsulations are serialized as plain maps, it is easy to stub out file operations in fixtures/factories by inserting data directly into the db without going through a changeset:
+Since Locators are serialized as plain maps, it is easy to stub out file operations in fixtures/factories by inserting data directly into the db without going through a changeset:
 
   ```
   %Attachment{
@@ -124,11 +122,9 @@ If you want to run tests on the actual file operations, you will need to make su
 Or, if you are using [CapsuleSupplement](https://github.com/elixir-capsule/supplement), you can configure your test environment to use the RAM storage:
 
   ```
-  {:ok, file_data} = Capsule.Storages.RAM.put(some_upload)
+  {:ok, id} = Capsule.Storages.RAM.put(some_upload)
 
-  %Attachment{
-    file_data: file_data
-  }
+  %Attachment{file_data: %{id: id, storage: Capsule.Storages.RAM}}
   |> Repo.insert!()
   ```
 

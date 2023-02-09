@@ -2,15 +2,15 @@ defmodule Capsule.EctoTest do
   use ExUnit.Case
   doctest Capsule.Ecto
 
-  alias Capsule.Encapsulation
+  alias Capsule.Locator
   alias Capsule.Ecto.Test.{TestUser, TestAttacher}
 
   describe "encapsulate/4" do
-    test "adds the encapsulation data to changeset" do
+    test "adds the locator data to changeset" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(%{attachment: %{}}, [:attachment], fn _, _ ->
-                 %Encapsulation{}
+                 %Locator{}
                end)
     end
 
@@ -24,27 +24,27 @@ defmodule Capsule.EctoTest do
       assert {"wrong", []} = errors[:attachment]
     end
 
-    test "adds the encapsulation data to changeset when params have binary keys" do
+    test "adds the locator data to changeset when params have binary keys" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(%{"attachment" => %{}}, [:attachment], fn _, _ ->
-                 %Encapsulation{}
+                 %Locator{}
                end)
     end
   end
 
   describe "encapsulate/4 with invalid param is ignored" do
-    test "adds the encapsulation data to changeset" do
+    test "adds the locator data to changeset" do
       assert %{changes: %{}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(%{"what" => %{}}, [:attachment], fn _, _ ->
-                 %Encapsulation{}
+                 %Locator{}
                end)
     end
   end
 
   describe "encapsulate/5" do
-    test "adds the encapsulation data to changeset" do
+    test "adds the locator data to changeset" do
       assert %{changes: %{attachment: _}} =
                Ecto.Changeset.change(%TestUser{})
                |> Capsule.Ecto.encapsulate(

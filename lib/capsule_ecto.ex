@@ -17,14 +17,14 @@ defmodule Capsule.Ecto do
         {mod, func_name}
       )
 
-  defp do_encapsulate(changeset, params, permitted, encapsulation_args) do
+  defp do_encapsulate(changeset, params, permitted, locator_args) do
     stringified_permitted = Enum.map(permitted, &to_string/1)
 
     Enum.reduce(params, changeset, fn {field, _} = params_pair, changeset ->
       with true <- Enum.member?(stringified_permitted, to_string(field)),
-           %Capsule.Encapsulation{} = encapsulation <-
-             do_encapsulate(encapsulation_args |> Tuple.append([params_pair, changeset])) do
-        Ecto.Changeset.cast(changeset, %{field => encapsulation}, permitted)
+           %Capsule.Locator{} = locator <-
+             do_encapsulate(locator_args |> Tuple.append([params_pair, changeset])) do
+        Ecto.Changeset.cast(changeset, %{field => locator}, permitted)
       end
       |> case do
         false -> changeset
