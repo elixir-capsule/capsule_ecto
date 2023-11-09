@@ -25,19 +25,13 @@ defmodule Capsule.Ecto.TypeTest do
 
   describe "load/1 when data is map with string keys" do
     test "converts map to locator and wraps in success tuple" do
-      assert {:ok, %Locator{id: "test"}} = Type.load(%{"id" => "test"})
+      assert {:ok, %Locator{id: "test", storage: "fake"}} = Type.load(%{"id" => "test", "storage" => "fake"})
     end
   end
 
   describe "dump/1 when data is an locator" do
     test "converts locator to map and wraps in success tuple" do
       assert {:ok, %{id: "test"}} = Type.dump(%Locator{id: "test"})
-    end
-  end
-
-  describe "dump/1 when data is a map" do
-    test "wraps data in success tuple" do
-      assert {:ok, %{id: "test"}} = Type.dump(%{id: "test"})
     end
   end
 

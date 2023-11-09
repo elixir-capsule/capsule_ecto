@@ -1,7 +1,7 @@
 defmodule Capsule.Ecto.Type do
   use Ecto.Type
 
-  alias Capsule.{Locator}
+  alias Capsule.Locator
 
   def type, do: :map
 
@@ -9,16 +9,8 @@ defmodule Capsule.Ecto.Type do
   def cast(value) when is_map(value), do: Locator.new(value)
   def cast(_), do: :error
 
-  def load(serialized_data) when is_map(serialized_data) do
-    atomized_keys =
-      for {k, v} <- serialized_data, into: %{} do
-        {String.to_existing_atom(k), v}
-      end
-
-    {:ok, struct(Locator, atomized_keys)}
-  end
+  def load(serialized_data) when is_map(serialized_data), do: Locator.new(serialized_data)
 
   def dump(%Locator{} = locator), do: {:ok, locator |> Map.from_struct()}
-  def dump(data) when is_map(data), do: {:ok, data}
   def dump(_), do: :error
 end
