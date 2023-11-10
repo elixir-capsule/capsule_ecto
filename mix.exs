@@ -4,7 +4,7 @@ defmodule CapsuleEcto.MixProject do
   def project do
     [
       app: :capsule_ecto,
-      version: "0.9.0",
+      version: "0.10.0",
       description: "Ecto integration for Capsule",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
