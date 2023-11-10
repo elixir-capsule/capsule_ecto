@@ -26,7 +26,7 @@ defmodule CapsuleEcto.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:capsule, "~> 0.9"},
+      {:capsule, "~> 0.10"},
       {:ecto, "~> 3.4"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
