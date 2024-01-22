@@ -33,11 +33,11 @@ It is expected to return either a success tuple with the `Locator` struct or the
 Even if you want to extract some metadata and apply a validation after you store the file, then the anonymous function may be all you need:
 
   ```
-  |> %Attachment{}
+  %Attachment{}
   |> Ecto.changeset.change()
   |> Capsule.Ecto.upload(%{"file_data" => some_upload}, [:file_data], fn {_field, upload}, changeset ->
       case Capsule.Storages.Disk.put(upload) do
-        {:ok, id} -> %{id: id, storage: Capsule.Storages.Disk, metadata: %{yo: :dawg}}
+        {:ok, id} -> Capsule.Locator.new!(id: id, storage: Capsule.Storages.Disk)
         error_tuple -> add_error(changeset, "upload just...failed")
       end
   end)
@@ -48,8 +48,8 @@ Even if you want to extract some metadata and apply a validation after you store
 However, if you want to do more complicated things with the upload before storing it (such as resizing, encrypting, etc) then creating a module is probably the way to go.
 
   ```
-  |> %Attachment{}
-  |> Ecto.changeset.change()
+  %Attachment{}
+  |> Ecto.Changeset.change()
   |> Capsule.Ecto.upload(%{"file_data" => some_upload}, [:file_data], MyApp.Attacher, :attach)
   ```
 ---
@@ -63,7 +63,7 @@ One good option is to wrap your Repo operation in another function to handle bot
   ```
   def create_attachment(user, attrs) do
   %Attachment{}
-  |> Ecto.changeset.change()
+  |> Ecto.Changeset.change()
   |> Capsule.Ecto.upload(attrs, [:file_data], MyApp.Attacher, :attach)
   |> Repo.insert()
   |> case do
@@ -124,11 +124,10 @@ Or, if you are using [CapsuleSupplement](https://github.com/elixir-capsule/suppl
   ```
   {:ok, id} = Capsule.Storages.RAM.put(some_upload)
 
-  %Attachment{file_data: %{id: id, storage: Capsule.Storages.RAM}}
-  |> Repo.insert!()
+  Repo.insert!(%Attachment{file_data: %{id: id, storage: Capsule.Storages.RAM}})
   ```
 
-For maximum performance, I recommend creating a simple struct that implements the Upload protocol:
+Or, for maximum performance, you can a simple struct that stubs out the `Upload` protocol:
 
   ```
   defmodule Capsule.MockUpload do
