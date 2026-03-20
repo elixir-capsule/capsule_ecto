@@ -27,7 +27,7 @@ defmodule CapsuleEcto.MixProject do
   defp deps do
     [
       {:capsule, "~> 0.10"},
-      {:ecto, "~> 3.4"},
+      {:ecto, "~> 3.13"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
