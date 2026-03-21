@@ -31,7 +31,9 @@ defmodule Capsule.Ecto do
   """
   @spec upload(changeset(), params(), permitted(), (tuple(), changeset() -> Capsule.Locator.t() | changeset()), opts()) ::
           changeset()
-  def upload(changeset, params, permitted, func, opts \\ []) when is_function(func, 2),
+  def upload(changeset, params, permitted, func, opts \\ [])
+
+  def upload(changeset, params, permitted, func, opts) when is_function(func, 2),
     do: do_upload(changeset, params, permitted, {func}, opts)
 
   @spec upload(changeset(), params(), permitted(), module(), atom()) :: changeset()
@@ -49,7 +51,7 @@ defmodule Capsule.Ecto do
       with {_, _} = params_pair <-
              Enum.find(params, :missing, fn {k, _} -> to_string(k) == to_string(field) end),
            %Capsule.Locator{} = locator <-
-             do_upload(locator_args |> Tuple.append([params_pair, changeset])) do
+             do_upload(Tuple.insert_at(locator_args, tuple_size(locator_args), [params_pair, changeset])) do
         Ecto.Changeset.cast(changeset, %{field => locator}, permitted)
       end
       |> case do
