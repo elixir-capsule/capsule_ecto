@@ -43,6 +43,35 @@ defmodule Capsule.EctoTest do
     end
   end
 
+  describe "upload with required: true" do
+    test "adds error when param is missing" do
+      %{errors: errors} =
+        Ecto.Changeset.change(%TestUser{})
+        |> Capsule.Ecto.upload(%{}, [:attachment], fn _, _ -> %Locator{} end, required: true)
+
+      assert {"can't be blank", [validation: :required]} = errors[:attachment]
+    end
+
+    test "no error when param is present" do
+      assert %{errors: []} =
+               Ecto.Changeset.change(%TestUser{})
+               |> Capsule.Ecto.upload(
+                 %{attachment: %{}},
+                 [:attachment],
+                 fn _, _ -> %Locator{} end,
+                 required: true
+               )
+    end
+
+    test "adds error when non-schema param is missing" do
+      %{errors: errors} =
+        Ecto.Changeset.change(%TestUser{})
+        |> Capsule.Ecto.upload(%{}, [:foo], fn _, _ -> %Locator{} end, required: true)
+
+      assert {"can't be blank", [validation: :required]} = errors[:foo]
+    end
+  end
+
   describe "upload/5" do
     test "adds the locator data to changeset" do
       assert %{changes: %{attachment: _}} =
