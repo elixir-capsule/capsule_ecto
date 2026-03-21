@@ -1,10 +1,44 @@
 defmodule Capsule.Ecto do
+  @type changeset :: Ecto.Changeset.t()
+  @type params :: map()
+  @type permitted :: [atom()]
+  @type opts :: [required: boolean()]
+
+  @doc """
+  Processes an upload for each permitted field found in params, calling the
+  given function to produce a `Capsule.Locator` and casting it onto the changeset.
+
+  The handler function receives `{field, value}` and the current changeset,
+  and must return either a `Capsule.Locator` or an `Ecto.Changeset` (to add errors).
+
+  ## Options
+
+    * `:required` - when `true`, adds a validation error for any permitted field
+      not present in params. Defaults to `false`.
+
+  ## Examples
+
+      %MySchema{}
+      |> Ecto.Changeset.change()
+      |> Capsule.Ecto.upload(params, [:avatar], fn {_field, upload}, _changeset ->
+        Capsule.store(upload, MyStorage)
+      end)
+
+      %MySchema{}
+      |> Ecto.Changeset.change()
+      |> Capsule.Ecto.upload(params, [:avatar], MyUploader, :upload, required: true)
+
+  """
+  @spec upload(changeset(), params(), permitted(), (tuple(), changeset() -> Capsule.Locator.t() | changeset()), opts()) ::
+          changeset()
   def upload(changeset, params, permitted, func, opts \\ []) when is_function(func, 2),
     do: do_upload(changeset, params, permitted, {func}, opts)
 
+  @spec upload(changeset(), params(), permitted(), module(), atom()) :: changeset()
   def upload(changeset, params, permitted, mod, func_name),
     do: do_upload(changeset, params, permitted, {mod, func_name}, [])
 
+  @spec upload(changeset(), params(), permitted(), module(), atom(), opts()) :: changeset()
   def upload(changeset, params, permitted, mod, func_name, opts),
     do: do_upload(changeset, params, permitted, {mod, func_name}, opts)
 

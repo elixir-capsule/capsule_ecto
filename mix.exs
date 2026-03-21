@@ -12,7 +12,8 @@ defmodule CapsuleEcto.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       name: "CapsuleEcto",
       source_url: "https://github.com/elixir-capsule/capsule_ecto",
-      package: package()
+      package: package(),
+      docs: [main: "readme", extras: ["README.md"]]
     ]
   end
 
